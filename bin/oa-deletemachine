@@ -1,0 +1,20 @@
+#! /usr/bin/perl
+
+use strict;
+use Data::Dumper;
+use lib "/home/avi/bin/onapp-tools/lib";
+use lib "/home/avi/bin/Net-OnApp/lib";
+use Net::OnApp::Tools;
+use Net::OnApp;
+
+my $regex = $ARGV[0];
+
+my ($email, $key)= getOnAppCredentials();
+my $onAppURL = apiUrl();
+
+my $onapp = Net::OnApp->new(
+	api_email => $email,
+	api_key	  => $key,
+	api_url   => $onAppURL,
+);
+

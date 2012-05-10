@@ -1,0 +1,40 @@
+#! /usr/bin/perl
+
+use strict;
+use Data::Dumper;
+use lib "/home/avi/bin/onapp-tools/lib";
+use lib "/home/avi/bin/Net-OnApp/lib";
+use Net::OnApp::Tools;
+use Net::OnApp;
+
+my $regex = $ARGV[0];
+
+my ($email, $key)= getOnAppCredentials();
+my $onAppURL = apiUrl();
+
+my $onapp = Net::OnApp->new(
+	api_email => $email,
+	api_key	  => $key,
+	api_url   => $onAppURL,
+);
+
+my $m = $onapp->getVMs;
+my %machines = %{ $m };
+print "id\thostname              template              label\n";
+foreach( keys(%machines) ){
+		my %m = %{ $machines{$_} };
+		my $pw       = $m{'remote_access_password'};
+		my $host     = $m{'hostname'};
+		$host =~ /([^\.]+)\./;
+		$host = $1;
+		$host = sprintf("%-20s", $host);
+		my $label    = $m{'label'};
+		my $id       = $m{'id'};
+		my $note     = $m{'note'};
+		my $template = sprintf("%-20s", substr($m{'template_label'}, 0, 20));
+		my $booted   = $m{'booted'};
+		if ($host =~ /$regex/i || $label =~/$regex/i){
+			print "$id\t$host  $template  $label\n";
+		}
+
+}
