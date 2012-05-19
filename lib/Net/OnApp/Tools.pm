@@ -14,7 +14,7 @@ sub apiUrl {
 }
 
 sub getOnAppCredentials {
-	my $credentialsFile = $ENV{'HOME'}."/.onappcredentials";
+	my $credentialsFile = $ENV{'HOME'}."/.onapp_credentials";
 	my ($email,$key);
 	unless ( -f $credentialsFile ){
 	        print "OnApp requires that you log in with either a username and\n";    
