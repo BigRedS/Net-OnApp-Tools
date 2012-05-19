@@ -2,7 +2,7 @@
 
 use strict;
 use Data::Dumper;
-use lib "/home/avi/bin/onapp-tools/lib";
+use lib "/home/avi/bin/Net-OnApp-Tools/lib";
 use lib "/home/avi/bin/Net-OnApp/lib";
 use Net::OnApp::Tools;
 use Net::OnApp;
