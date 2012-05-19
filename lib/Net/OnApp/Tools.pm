@@ -7,7 +7,7 @@ use 5.010;
 use Carp;
 
 use base 'Exporter';
-our @EXPORT = qw(getOnAppCredentials apiUrl);
+our @EXPORT = qw(getOnAppCredentials apiUrl columnify);
 
 sub apiUrl {
 	return "cloudbase.us.positive-internet.com";
@@ -44,4 +44,12 @@ sub _getCredentialsFromFile {
 	chomp $user;
 	chomp $pass;
 	return($user,$pass);
+}
+
+sub columnify {
+	my $string = shift;
+	my $maxlen = shift;
+	my $length = $maxlen + 2;
+	my $truncatedString = sprintf("%-$length"."s", substr($string, 0, $maxlen));
+	return $truncatedString;
 }
