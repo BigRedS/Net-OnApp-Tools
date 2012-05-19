@@ -1,0 +1,43 @@
+#! /usr/bin/perl
+
+use strict;
+use Data::Dumper;
+use lib "/home/avi/bin/Net-OnApp-Tools/lib";
+use lib "/home/avi/bin/Net-OnApp/lib";
+use Net::OnApp::Tools;
+use Net::OnApp;
+
+my $regex = $ARGV[0];
+
+my ($email, $key)= getOnAppCredentials();
+my $onAppURL = apiUrl();
+
+my $onapp = Net::OnApp->new(
+	api_email => $email,
+	api_key	  => $key,
+	api_url   => $onAppURL,
+);
+
+
+my $h = $onapp->getHypervisors;
+my %hypervisors = %{ $h };
+my @rows;
+$rows[0] = ['ID', 'Label', 'Memory', 'Free Memory', 'Cores', 'CPUs', 'IP Address'];
+foreach(keys(%hypervisors)){
+	my %h = %{ $hypervisors{$_} };
+#print Dumper(%h);
+
+	my $ip_address = $h{'ip_address'};
+	my $id = $h{'id'};
+	my $total_cpus = $h{'total_cpus'};
+	my $memory = $h{'total_memory'};
+	my $free_memory = $h{'free_memory'};
+	my $cpu_cores = $h{'cpu_cores'};
+	my $label = $h{'label'};
+
+	my @row = ( $id, $label, $memory, $free_memory, $cpu_cores, $total_cpus, $ip_address );
+	push(@rows, \@row);
+
+}
+
+tabulate(@rows);

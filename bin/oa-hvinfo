@@ -1,0 +1,64 @@
+#! /usr/bin/perl
+
+use strict;
+use Data::Dumper;
+use lib "/home/avi/bin/Net-OnApp-Tools/lib";
+use lib "/home/avi/bin/Net-OnApp/lib";
+use Net::OnApp::Tools;
+use Net::OnApp;
+use 5.010;
+
+my $id = $ARGV[0];
+
+my ($email, $key)= getOnAppCredentials();
+my $onAppURL = apiUrl();
+
+my $onapp = Net::OnApp->new(
+	api_email => $email,
+	api_key	  => $key,
+	api_url   => $onAppURL,
+);
+
+my $h = $onapp->getHypervisors;
+my %hypervisors = %{ $h };
+my @rows;
+foreach( keys(%hypervisors) ){
+	my %h = %{ $hypervisors{$_} };
+	if($h{'id'} == $id){
+#	print Dumper(%h);
+#	last;
+
+	my @xm_list = split(/\n/, $h{'health'}{'xm_list'});
+	my $machines = $#xm_list;
+	$machines--; # exclude dom0
+
+	my @lvdisplay = split(/\n/, $h{'health'}{'lvdisplay'});
+	my $lvs = $#lvdisplay;
+	
+	my $uptime = $h{'health'}{'uptime'};
+	my @uptime = split(/\s/, $uptime);
+	my $up = join(" ", @uptime[2,3,4,5]);
+	$up =~ s/,$//;
+
+
+	say "Label           $h{'label'}";
+	say "ID:             $h{'id'}";
+	say "";  
+	say "VMs:            $machines";
+	say "LVs:            $lvs";
+	say "Total memory:   $h{'total_memory'} MB";
+	say "Free memory:    $h{'free_memory'} MB";
+	say "Cores:          $h{'cpu_cores'}";
+	say "IP address:     $h{'ip_address'}";
+	say "";
+	say "HV group:       $h{'hypervisor_group_id'}";
+	say "Enabled:        $h{'enabled'}";
+	say "Locked:         $h{'locked'}";
+	say "Online:         $h{'online'}";
+	say "Type:           $h{'hypervisor_type'}";
+	say "Spare:          $h{'spare'}";
+	say "";
+	say "created:        $h{'created_at'}";
+	say "uptime:         $up";
+	}
+}
