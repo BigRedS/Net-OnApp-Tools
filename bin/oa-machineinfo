@@ -1,0 +1,61 @@
+#! /usr/bin/perl
+
+use strict;
+use Data::Dumper;
+use lib "/home/avi/bin/Net-OnApp-Tools/lib";
+use lib "/home/avi/bin/Net-OnApp/lib";
+use Net::OnApp::Tools;
+use Net::OnApp;
+use 5.010;
+
+my $id = $ARGV[0];
+
+my ($email, $key)= getOnAppCredentials();
+my $onAppURL = apiUrl();
+
+my $onapp = Net::OnApp->new(
+	api_email => $email,
+	api_key	  => $key,
+	api_url   => $onAppURL,
+);
+
+my $m = $onapp->getVMs;
+my %machines = %{ $m };
+my @rows;
+foreach( keys(%machines) ){
+	my %m = %{ $machines{$_} };
+	if ($m{'id'} == $id){
+		my @ipAddresses;
+		foreach( @{ $m{'ip_addresses'} } ){
+                        push(@ipAddresses, "\t".$_->{'ip_address'}{'address'});
+                }
+
+		say "ID:          $m{'id'}";
+		say "Hostname:    $m{'hostname'}";
+		say "Label:       $m{'label'}";
+		say "Password:    $m{'remote_access_password'}";
+		say "Owner ID:    $m{'user_id'}";
+		say "";
+		say "Built:       $m{'built'}";
+		say "Booted:      $m{'booted'}";
+		say "Locked:      $m{'locked'}";
+		say "Suspended:   $m{'suspended'}";
+		say "In Recovery: $m{'recovery_mode'}";
+		say "";
+		say "Template:    $m{'template_label'}";
+		say "CPU count:   $m{'cpus'}";
+		say "CPU share:   $m{'cpu_shares'} %";
+		say "RAM:         $m{'memory'} MB";
+		say "Disk:        $m{'total_disk_size'} GB";
+		say "";
+		say "IP addresses:";
+		say join ("\n", @ipAddresses);
+		say "";
+		say "Created:     $m{'created_at'}";
+		say "Modified:    $m{'updated_at'}";
+		say "Hypervisor:  $m{'hypervisor_id'}";
+		say "";
+		say "Admin Note:\n $m{'admin_note'}" if $m{'admin_note'} =~ /.+/;
+		last;
+	}
+}
