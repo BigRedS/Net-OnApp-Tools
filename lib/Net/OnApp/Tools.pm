@@ -6,9 +6,11 @@ use strict;
 use 5.010;
 use Carp;
 
-use base 'Exporter';
-our @EXPORT = qw(getOnAppCredentials apiUrl columnify);
 
+use base 'Exporter';
+our @EXPORT = qw(getOnAppCredentials apiUrl columnify tabulate);
+
+use Data::Dumper;
 sub apiUrl {
 	return "cloudbase.us.positive-internet.com";
 }
@@ -49,7 +51,28 @@ sub _getCredentialsFromFile {
 sub columnify {
 	my $string = shift;
 	my $maxlen = shift;
-	my $length = $maxlen + 2;
+	my $length = $maxlen + 4;
 	my $truncatedString = sprintf("%-$length"."s", substr($string, 0, $maxlen));
 	return $truncatedString;
+}
+
+sub tabulate {
+	my @data = @_;
+	my @colwidths;
+	foreach my $r (@data){
+		my @row = @{$r};
+		for(my $column = 0; $column < $#row+1 ; $column++ ){
+			$colwidths[$column] = length($row[$column]) if (length($row[$column]) > $colwidths[$column]);
+		}
+	}
+	# Last element of first line gets an extra linebreak.
+	$data[0][-1] .= "\n";
+	print "\n";
+	foreach my $r (@data){
+		my @row = @{$r};
+		for(my $column = 0; $column < $#row+1 ; $column++){
+			print columnify($row[$column], $colwidths[$column]);
+		}
+		print "\n";
+	}
 }
