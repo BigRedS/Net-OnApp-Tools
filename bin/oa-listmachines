@@ -20,21 +20,26 @@ my $onapp = Net::OnApp->new(
 
 my $m = $onapp->getVMs;
 my %machines = %{ $m };
-print "id\thostname              template              label\n";
+my @rows;
+$rows[0] = [qw/ID Hostname Label IP Template Booted HV/];
 foreach( keys(%machines) ){
 		my %m = %{ $machines{$_} };
-		my $pw       = $m{'remote_access_password'};
+		my @ipAddresses;
+		foreach( @{ $m{'ip_addresses'} } ){
+			push(@ipAddresses, $_->{'ip_address'}{'address'});
+		}
 		my $host     = $m{'hostname'};
 		$host =~ /([^\.]+)\./;
 		$host = $1;
-		$host = sprintf("%-20s", $host);
 		my $label    = $m{'label'};
 		my $id       = $m{'id'};
-		my $note     = $m{'note'};
-		my $template = sprintf("%-20s", substr($m{'template_label'}, 0, 20));
-		my $booted   = $m{'booted'};
+		my $template = $m{'template_label'};
+		my $boot   =  $m{'booted'};
+#		my $boot     = JSON::XS::is_bool($boot);
+		my $HV   = $m{'hypervisor_id'};
 		if ($host =~ /$regex/i || $label =~/$regex/i){
-			print "$id\t$host  $template  $label\n";
+			my @row = ($id, $host, $label, $ipAddresses[0], $template, $boot, $HV);
+			push(@rows, \@row);
 		}
-
 }
+tabulate(@rows);
