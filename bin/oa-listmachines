@@ -17,14 +17,7 @@ GetOptions (
 );
 
 
-my ($email, $key)= getOnAppCredentials();
-my $onAppURL = apiUrl();
-
-my $onapp = Net::OnApp->new(
-	api_email => $email,
-	api_key	  => $key,
-	api_url   => $onAppURL,
-);
+my $onapp = connectToOnApp( {cloud => "posicloud"} );
 
 my $m = $onapp->getVMs;
 my %machines = %{ $m };
