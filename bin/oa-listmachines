@@ -6,8 +6,16 @@ use lib "/home/avi/bin/Net-OnApp-Tools/lib";
 use lib "/home/avi/bin/Net-OnApp/lib";
 use Net::OnApp::Tools;
 use Net::OnApp;
+use Getopt::Long;
 
-my $regex = $ARGV[0];
+my $opts = {};
+GetOptions (
+	"ip-address|a=s"   => \$opts->{'ip_address'},
+	"label=s"          => \$opts->{'label'},
+	"hostname=s"       => \$opts->{'hostname'},
+	"hypervisor|H=s"   => \$opts->{'hypervisor_id'},
+);
+
 
 my ($email, $key)= getOnAppCredentials();
 my $onAppURL = apiUrl();
@@ -23,10 +31,12 @@ my %machines = %{ $m };
 my @rows;
 $rows[0] = [qw/ID Hostname Label IP Template Booted HV/];
 foreach( keys(%machines) ){
+		my $list = 0;
 		my %m = %{ $machines{$_} };
 		my @ipAddresses;
 		foreach( @{ $m{'ip_addresses'} } ){
 			push(@ipAddresses, $_->{'ip_address'}{'address'});
+  		$list++ if($_->{'ip_address'}{'address'} =~ /$opts->{'ip_address'}/);
 		}
 		my $host     = $m{'hostname'};
 		$host =~ /([^\.]+)\./;
@@ -35,9 +45,18 @@ foreach( keys(%machines) ){
 		my $id       = $m{'id'};
 		my $template = $m{'template_label'};
 		my $boot   =  $m{'booted'};
-#		my $boot     = JSON::XS::is_bool($boot);
 		my $HV   = $m{'hypervisor_id'};
-		if ($host =~ /$regex/i || $label =~/$regex/i){
+
+		foreach my $key (keys(%m)){
+			if($opts->{$key}){
+				if($m{$key} =~ /^\d+$/){
+					$list++ if $m{$key} == $opts->{$key};
+				}else{
+					$list++ if($m{key} =~ m/$opts->{$key}/i);
+				}
+			}
+		}
+		if($list > 0){
 			my @row = ($id, $host, $label, $ipAddresses[0], $template, $boot, $HV);
 			push(@rows, \@row);
 		}
