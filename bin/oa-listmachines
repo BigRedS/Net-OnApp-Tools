@@ -36,7 +36,7 @@ foreach( keys(%machines) ){
 		my @ipAddresses;
 		foreach( @{ $m{'ip_addresses'} } ){
 			push(@ipAddresses, $_->{'ip_address'}{'address'});
-  		$list++ if($_->{'ip_address'}{'address'} =~ /$opts->{'ip_address'}/);
+			$list++ if($opts->{'ip_address'} && ($_->{'ip_address'}{'address'} =~ /$opts->{'ip_address'}/));
 		}
 		my $host     = $m{'hostname'};
 		$host =~ /([^\.]+)\./;
@@ -52,7 +52,7 @@ foreach( keys(%machines) ){
 				if($m{$key} =~ /^\d+$/){
 					$list++ if $m{$key} == $opts->{$key};
 				}else{
-					$list++ if($m{key} =~ m/$opts->{$key}/i);
+					$list++ if($m{$key} =~ m/$opts->{$key}/i);
 				}
 			}
 		}

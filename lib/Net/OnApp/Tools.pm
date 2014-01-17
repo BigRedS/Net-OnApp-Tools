@@ -5,14 +5,40 @@ package Net::OnApp::Tools;
 use strict;
 use 5.010;
 use Carp;
+use YAML qw/LoadFile/;
+use Net::OnApp;
 
 
 use base 'Exporter';
-our @EXPORT = qw(getOnAppCredentials apiUrl columnify tabulate);
+our @EXPORT = qw(getOnAppCredentials apiUrl columnify tabulate connectToOnApp);
 
 use Data::Dumper;
 sub apiUrl {
 	return "cloudbase.us.positive-internet.com";
+}
+
+sub getConfig{
+	my $args = shift;
+	my $f_cf = $ENV{'ONAPP_CLOUDS_CONFIG'} || "/etc/onapp-tools/clouds.cf";
+	my $cf = LoadFile($f_cf);
+	my $cloud = $args->{'cloud'} || $cf->{'default_cloud'};
+
+	if($cf->{'clouds'}->{$cloud}){
+		return $cf->{'clouds'}->{$cloud};
+	}else{
+		die ("Unknown cloud '$cloud'");
+	}
+}
+
+sub connectToOnApp{
+	my $args = shift;
+	my $cf = getConfig($args);
+	my $onapp = Net::OnApp->new(
+		api_email => $cf->{'user'},
+		api_key   => $cf->{'password'},
+		api_url   => $cf->{'url'},
+	) or die ("Failed to connect to OnApp");
+	return $onapp;
 }
 
 sub getOnAppCredentials {
