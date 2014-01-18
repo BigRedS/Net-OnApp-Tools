@@ -14,10 +14,20 @@ GetOptions (
 	"label=s"          => \$opts->{'label'},
 	"hostname=s"       => \$opts->{'hostname'},
 	"hypervisor|H=s"   => \$opts->{'hypervisor_id'},
+	"cloud|c=s"        => \$opts->{'cloud'},
+);
+
+# If there's no search terms, return everything
+$opts->{'label'} = "." unless( 
+	$opts->{'ip_address'} or
+  $opts->{'label'} or
+	$opts->{'hostname'} or
+	$opts->{'hypervisor_id'}
 );
 
 
-my $onapp = connectToOnApp( {cloud => "posicloud"} );
+
+my $onapp = connectToOnApp( {cloud => "$opts->{'cloud'}"} );
 
 my $m = $onapp->getVMs;
 my %machines = %{ $m };
@@ -29,7 +39,9 @@ foreach( keys(%machines) ){
 		my @ipAddresses;
 		foreach( @{ $m{'ip_addresses'} } ){
 			push(@ipAddresses, $_->{'ip_address'}{'address'});
-			$list++ if($opts->{'ip_address'} && ($_->{'ip_address'}{'address'} =~ /$opts->{'ip_address'}/));
+			if($opts->{'ip_address'}){
+				$list++ if ($_->{'ip_address'}{'address'} =~ /$opts->{'ip_address'}/);
+			}
 		}
 		my $host     = $m{'hostname'};
 		$host =~ /([^\.]+)\./;
@@ -39,7 +51,7 @@ foreach( keys(%machines) ){
 		my $template = $m{'template_label'};
 		my $boot   =  $m{'booted'};
 		my $HV   = $m{'hypervisor_id'};
-
+$list = 0;
 		foreach my $key (keys(%m)){
 			if($opts->{$key}){
 				if($m{$key} =~ /^\d+$/){
